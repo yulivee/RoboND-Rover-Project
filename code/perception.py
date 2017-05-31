@@ -17,6 +17,20 @@ def color_thresh(img, rgb_thresh=(160, 160, 160)):
     # Return the binary image
     return color_select
 
+def obstacles_thresh(img, rgb_thresh=(160, 160, 160)):
+    # Create an array of zeros same xy size as img, but single channel
+    color_select = np.zeros_like(img[:,:,0])
+    # Require that each pixel be above all three threshold values in RGB
+    # above_thresh will now contain a boolean array with "True"
+    # where threshold was met
+    below_thresh = (img[:,:,0] < rgb_thresh[0]) \
+                & (img[:,:,1] < rgb_thresh[1]) \
+                & (img[:,:,2] < rgb_thresh[2])
+    # Index the array of zeros with the boolean array and set to 1
+    color_select[below_thresh] = 1
+    # Return the binary image
+    return color_select
+
 # Define a function to convert to rover-centric coordinates
 def rover_coords(binary_img):
     # Identify nonzero pixels
@@ -111,7 +125,7 @@ def perception_step(Rover):
     # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
     img_coltres = color_thresh(img_trans, (160, 160, 160))
     img_rocks   = mask_rock(img_trans)
-    img_obs     = color_thresh(img_trans, (90, 90, 90))
+    img_obs     = obstacles_thresh(img_trans, (160, 160, 160))
     # 4) Update Rover.vision_image (this will be displayed on left side of screen)
         # Example: Rover.vision_image[:,:,0] = obstacle color-thresholded binary image
         #          Rover.vision_image[:,:,1] = rock_sample color-thresholded binary image
